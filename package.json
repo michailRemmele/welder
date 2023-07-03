@@ -1,0 +1,42 @@
+{
+  "name": "welder",
+  "version": "0.0.0",
+  "description": "Browser platformer game about a builder who wants to reach the top of the building",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx cross-env NODE_ENV=development webpack-dev-server",
+    "start:editor": "npm run build:editor && npx remiz-editor",
+    "build": "npx cross-env NODE_ENV=production webpack",
+    "build:editor": "npx cross-env NODE_ENV=production webpack --config webpack.editor.config.js"
+  },
+  "dependencies": {
+    "remiz": "0.10.4",
+    "remiz-editor": "0.0.1"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "eslint": "^8.44.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "html-webpack-plugin": "^5.5.3",
+    "terser-webpack-plugin": "^5.3.9",
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michailRemmele/welder.git"
+  },
+  "keywords": [
+    "game",
+    "platformer"
+  ],
+  "author": "Mikhail Remmele",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michailRemmele/welder/issues"
+  },
+  "homepage": "https://github.com/michailRemmele/welder#readme"
+}
