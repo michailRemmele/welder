@@ -16,7 +16,7 @@ module.exports = {
 
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: '[name].[hash].js',
+    filename: '[name].[fullhash].js',
   },
 
   devServer: {
@@ -55,6 +55,9 @@ module.exports = {
           globOptions: {
             ignore: [path.resolve(__dirname, 'public/index.html')],
           },
+        },
+        {
+          from: path.join(__dirname, 'data/assets'),
         },
       ],
     }),
