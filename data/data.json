@@ -1028,7 +1028,7 @@
               "config": {
                 "type": "boxCollider",
                 "collider": {
-                  "sizeX": 8,
+                  "sizeX": 16,
                   "sizeY": 16,
                   "centerX": 8,
                   "centerY": 16
