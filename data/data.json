@@ -17,7 +17,7 @@
           "options": {
             "windowNodeId": "root",
             "initialCamera": "ced29e41-22bf-4665-a0d9-b20a666e6afe",
-            "scaleSensitivity": 0
+            "scaleSensitivity": 1
           }
         },
         {
@@ -665,7 +665,7 @@
             {
               "name": "camera",
               "config": {
-                "zoom": 4
+                "zoom": 2.5
               }
             }
           ],
@@ -962,7 +962,7 @@
                   "options": {
                     "blending": "normal",
                     "color": "#ff0000",
-                    "opacity": 1
+                    "opacity": 0
                   }
                 }
               }
@@ -1770,7 +1770,7 @@
             {
               "name": "transform",
               "config": {
-                "offsetX": 736,
+                "offsetX": 720,
                 "offsetY": -16,
                 "offsetZ": 0,
                 "rotation": 0,
@@ -1783,7 +1783,7 @@
               "config": {
                 "type": "static",
                 "src": "city.png",
-                "width": 2400,
+                "width": 600,
                 "height": 64,
                 "rotation": 0,
                 "sortCenter": [
@@ -2680,6 +2680,113 @@
               "config": {
                 "offsetX": 1624,
                 "offsetY": -152,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "1ec2ef30-454b-41b0-9317-fb9b5bab12cf",
+          "name": "cityBackgroundBottom",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 720,
+                "offsetY": 176,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            },
+            {
+              "name": "renderable",
+              "config": {
+                "type": "static",
+                "src": "",
+                "width": 2400,
+                "height": 128,
+                "rotation": 0,
+                "sortCenter": [
+                  0,
+                  0
+                ],
+                "flipX": false,
+                "flipY": false,
+                "sortingLayer": "background",
+                "fit": "repeat",
+                "material": {
+                  "type": "basic",
+                  "options": {
+                    "blending": "normal",
+                    "color": "#394f4c",
+                    "opacity": 1
+                  }
+                }
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "c620f95b-00c0-4f9d-967d-a2b54ea18272",
+          "templateId": "3bf0f2d2-11f9-47e4-9a41-bef7af131342",
+          "fromTemplate": true,
+          "name": "platformShort 26",
+          "type": "",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 1624,
+                "offsetY": 120,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "04ff5d0a-326f-4cf0-8730-795d6eabd577",
+          "templateId": "3bf0f2d2-11f9-47e4-9a41-bef7af131342",
+          "fromTemplate": true,
+          "name": "platformShort 27",
+          "type": "",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 1624,
+                "offsetY": 136,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "abcc1b1b-c05f-4f0e-8a6c-b10c1757a01e",
+          "templateId": "3bf0f2d2-11f9-47e4-9a41-bef7af131342",
+          "fromTemplate": true,
+          "name": "platformShort 28",
+          "type": "",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 1624,
+                "offsetY": 152,
                 "offsetZ": 0,
                 "rotation": 0,
                 "scaleX": 1,
