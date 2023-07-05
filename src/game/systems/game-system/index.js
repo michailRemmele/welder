@@ -1,11 +1,17 @@
+import { Vector2 } from 'remiz';
+
 const TRANSFORM_COMPONENT_NAME = 'transform';
 const AI_COMPONENT_NAME = 'ai';
 const ATTACK_COMPONENT_NAME = 'attack';
 const VIEW_DIRECTION_COMPONENT_NAME = 'viewDirection';
+const RIGID_BODY_COMPONENT_NAME = 'rigidBody';
+const COLLIDER_COMPONENT_NAME = 'colliderContainer';
+const CONTROL_COMPONENT_NAME = 'keyboardControl';
 
 const COLLISION_ENTER_MSG = 'COLLISION_ENTER';
 const LOAD_SCENE_MSG = 'LOAD_SCENE';
 const ATTACK_MSG = 'ATTACK';
+const ADD_IMPULSE_MSG = 'ADD_IMPULSE';
 
 const ATTACK_TEMPLATE_ID = '2dce7f95-7a95-487a-b6e7-c84edd8f861e';
 
@@ -16,8 +22,6 @@ const CAMERA_ID = 'ced29e41-22bf-4665-a0d9-b20a666e6afe';
 const DEAD_ZONE_ID = '48f641b4-8c92-4676-910e-346cc7b31088';
 const ELEVATOR_ID = '62201ef0-b40c-4433-8dd0-d7ff3ff4d04f';
 
-const RESTART_ZONES = [DEAD_ZONE_ID, ELEVATOR_ID];
-
 const ATTACK_DISTANCE = 16;
 const ATTACK_COOLDOWN = 500;
 
@@ -26,6 +30,9 @@ export class GameSystem {
     this.gameObjectObserver = options.createGameObjectObserver({});
     this.attacksObserver = options.createGameObjectObserver({
       components: [ATTACK_COMPONENT_NAME],
+    });
+    this.corpseObserver = options.createGameObjectObserver({
+      components: [TRANSFORM_COMPONENT_NAME, COLLIDER_COMPONENT_NAME, RIGID_BODY_COMPONENT_NAME],
     });
     this.gameObjectSpawner = options.gameObjectSpawner;
     this.gameObjectDestroyer = options.gameObjectDestroyer;
@@ -55,6 +62,7 @@ export class GameSystem {
 
     if (this.attackCooldown > 0) {
       this.attackCooldown -= deltaTime;
+      this.messageBus.deleteById(ATTACK_MSG, PLAYER_ID);
       return;
     }
 
@@ -76,17 +84,31 @@ export class GameSystem {
     this.attackCooldown = ATTACK_COOLDOWN;
   }
 
+  updateDamage() {
+    const collisionMessages = this.messageBus.getById(COLLISION_ENTER_MSG, PLAYER_ID);
+    const shouldFly = collisionMessages?.some(
+      (message) => !!message.gameObject2.getComponent(AI_COMPONENT_NAME),
+    );
+
+    const player = this.gameObjectObserver.getById(PLAYER_ID);
+    const rigidBody = player.getComponent(RIGID_BODY_COMPONENT_NAME);
+
+    if (shouldFly && !rigidBody.ghost) {
+      rigidBody.ghost = true;
+      player.removeComponent(CONTROL_COMPONENT_NAME);
+      this.messageBus.send({
+        type: ADD_IMPULSE_MSG,
+        value: new Vector2(0, -150),
+        gameObject: player,
+        id: PLAYER_ID,
+      });
+    }
+  }
+
   updateGameOver() {
     const collisionMessages = this.messageBus.getById(COLLISION_ENTER_MSG, PLAYER_ID);
-    if (!collisionMessages?.length) {
-      return;
-    }
-
-    let isGameOver = collisionMessages.some(
-      (message) => RESTART_ZONES.includes(message.gameObject2.id),
-    );
-    isGameOver ||= collisionMessages.some(
-      (message) => !!message.gameObject2.getComponent(AI_COMPONENT_NAME),
+    const isGameOver = collisionMessages?.some(
+      (message) => message.gameObject2.id === DEAD_ZONE_ID,
     );
 
     if (isGameOver) {
@@ -99,9 +121,41 @@ export class GameSystem {
     }
   }
 
+  updateFinish() {
+    const collisionMessages = this.messageBus.getById(COLLISION_ENTER_MSG, PLAYER_ID);
+    const isGameOver = collisionMessages?.some(
+      (message) => message.gameObject2.id === ELEVATOR_ID,
+    );
+
+    if (isGameOver) {
+      const player = this.gameObjectObserver.getById(PLAYER_ID);
+      player.removeComponent(CONTROL_COMPONENT_NAME);
+
+      const elevator = this.gameObjectObserver.getById(ELEVATOR_ID);
+      const rigidBody = elevator.getComponent(RIGID_BODY_COMPONENT_NAME);
+      rigidBody.useGravity = true;
+    }
+  }
+
+  updateDeath() {
+    this.corpseObserver.forEach((gameObject) => {
+      const collisionMessages = this.messageBus.getById(COLLISION_ENTER_MSG, gameObject.id);
+      const shouldDie = collisionMessages?.some(
+        (message) => message.gameObject2.id === DEAD_ZONE_ID,
+      );
+
+      if (shouldDie) {
+        this.gameObjectDestroyer.destroy(gameObject);
+      }
+    });
+  }
+
   update({ deltaTime }) {
     this.updateCamera();
     this.updateAttack(deltaTime);
+    this.updateDamage();
     this.updateGameOver();
+    this.updateFinish();
+    this.updateDeath();
   }
 }

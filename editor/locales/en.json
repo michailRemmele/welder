@@ -3,14 +3,8 @@
   "components.movement.speed.title": "Speed",
 
   "components.ai.title": "AI",
-  "components.ai.direction.title": "Direction",
-  "components.ai.directions.right.title": "Right",
-  "components.ai.directions.left.title": "Left",
-
   "components.aiBlocker.title": "AI Blocker",
-
   "components.attack.title": "Attack",
-
   "components.viewDirection.title": "View Direction",
 
   "systems.movementSystem.title": "Movement System",

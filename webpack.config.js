@@ -21,9 +21,10 @@ module.exports = {
 
   devServer: {
     open: true,
-    static: {
-      directory: path.join(__dirname, 'public'),
-    },
+    static: [
+      path.join(__dirname, 'public'),
+      path.join(__dirname, 'data/assets'),
+    ],
   },
 
   devtool: isDev ? 'eval' : false,
