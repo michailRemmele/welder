@@ -2,12 +2,5 @@
   "components.movement.title": "Movement",
   "components.movement.speed.title": "Speed",
 
-  "components.ai.title": "AI",
-  "components.aiBlocker.title": "AI Blocker",
-  "components.attack.title": "Attack",
-  "components.viewDirection.title": "View Direction",
-
-  "systems.movementSystem.title": "Movement System",
-  "systems.gameSystem.title": "Game System",
-  "systems.aiSystem.title": "AI System"
+  "systems.movementSystem.title": "Movement System"
 }
