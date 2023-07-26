@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "remiz": "0.10.4",
-    "remiz-editor": "0.0.2"
+    "remiz-editor": "0.0.4"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",
