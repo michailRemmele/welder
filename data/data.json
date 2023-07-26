@@ -1,16 +1,580 @@
 {
-  "scenes": [],
-  "levels": [],
-  "templates": [],
+  "scenes": [
+    {
+      "id": "4f3c4560-ac1d-47f1-8e26-6135e5fe1d6b",
+      "name": "Game",
+      "systems": [
+        {
+          "name": "keyboardInputSystem",
+          "options": {}
+        },
+        {
+          "name": "keyboardControlSystem",
+          "options": {}
+        },
+        {
+          "name": "movementSystem",
+          "options": {}
+        },
+        {
+          "name": "physicsSystem",
+          "options": {
+            "gravitationalAcceleration": 450
+          }
+        },
+        {
+          "name": "cameraSystem",
+          "options": {
+            "windowNodeId": "root",
+            "initialCamera": "148f779f-2099-45b6-884a-d3d87294e011",
+            "scaleSensitivity": 1
+          }
+        },
+        {
+          "name": "animator",
+          "options": {}
+        },
+        {
+          "name": "renderer",
+          "options": {
+            "windowNodeId": "root",
+            "backgroundColor": "#c1e1d9",
+            "backgroundAlpha": 1
+          }
+        }
+      ],
+      "levelId": "ea922e4e-1346-4e57-9053-0ede0cc48961"
+    }
+  ],
+  "levels": [
+    {
+      "id": "ea922e4e-1346-4e57-9053-0ede0cc48961",
+      "name": "Level 1",
+      "gameObjects": [
+        {
+          "id": "148f779f-2099-45b6-884a-d3d87294e011",
+          "name": "Camera",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 0,
+                "offsetY": 0,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            },
+            {
+              "name": "camera",
+              "config": {
+                "zoom": 4
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "4148e71a-2400-4308-8412-4918b75ccc21",
+          "name": "Player",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": -36,
+                "offsetY": -20,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            },
+            {
+              "name": "renderable",
+              "config": {
+                "type": "sprite",
+                "src": "welder.png",
+                "width": 24,
+                "height": 24,
+                "rotation": 0,
+                "sortCenter": [
+                  0,
+                  0
+                ],
+                "flipX": false,
+                "flipY": false,
+                "sortingLayer": "units",
+                "fit": "stretch",
+                "material": {
+                  "type": "basic",
+                  "options": {
+                    "blending": "normal",
+                    "color": "#ffffff",
+                    "opacity": 1
+                  }
+                },
+                "slice": 7
+              }
+            },
+            {
+              "name": "rigidBody",
+              "config": {
+                "type": "dynamic",
+                "mass": 1,
+                "useGravity": true,
+                "isPermeable": false,
+                "ghost": false,
+                "drag": 0
+              }
+            },
+            {
+              "name": "colliderContainer",
+              "config": {
+                "type": "boxCollider",
+                "collider": {
+                  "sizeX": 24,
+                  "sizeY": 24,
+                  "centerX": 0,
+                  "centerY": 0
+                }
+              }
+            },
+            {
+              "name": "animatable",
+              "config": {
+                "initialState": "a93eb63a-0024-43b4-bc47-326c39c4ee3a",
+                "states": [
+                  {
+                    "id": "a93eb63a-0024-43b4-bc47-326c39c4ee3a",
+                    "name": "Idle",
+                    "type": "individual",
+                    "speed": 0.5,
+                    "timeline": {
+                      "frames": [
+                        {
+                          "id": "48dfd862-8c6e-49bc-9de3-5ac9ced607e0",
+                          "fields": [
+                            {
+                              "id": "cad947af-81a8-499f-80c1-9c2738d58035",
+                              "name": "components.renderable.currentFrame",
+                              "type": "number",
+                              "value": 0
+                            }
+                          ]
+                        },
+                        {
+                          "id": "9e5248d6-8af4-4361-8a02-27129d392583",
+                          "fields": [
+                            {
+                              "id": "cad947af-81a8-499f-80c1-9c2738d58035",
+                              "name": "components.renderable.currentFrame",
+                              "type": "number",
+                              "value": 1
+                            }
+                          ]
+                        },
+                        {
+                          "id": "527c62b7-e9ca-43a0-8021-5bb914d5c173",
+                          "fields": [
+                            {
+                              "id": "cad947af-81a8-499f-80c1-9c2738d58035",
+                              "name": "components.renderable.currentFrame",
+                              "type": "number",
+                              "value": 2
+                            }
+                          ]
+                        }
+                      ],
+                      "looped": true
+                    },
+                    "transitions": []
+                  }
+                ]
+              }
+            },
+            {
+              "name": "keyboardControl",
+              "config": {
+                "inputEventBindings": [
+                  {
+                    "id": "026320dc-a5c6-4c5e-9ae4-21b0ae2db9fc",
+                    "key": "D",
+                    "event": "PRESSED",
+                    "messageType": "MOVE_RIGHT",
+                    "attrs": []
+                  },
+                  {
+                    "id": "762ef80f-0c6c-4cb1-97fc-18d9920027e2",
+                    "key": "A",
+                    "event": "PRESSED",
+                    "messageType": "MOVE_LEFT",
+                    "attrs": []
+                  },
+                  {
+                    "id": "e766705f-19c1-4c94-a608-deb1652cd6cc",
+                    "key": "SPACE",
+                    "event": "PRESSED",
+                    "messageType": "MOVE_JUMP",
+                    "attrs": []
+                  }
+                ]
+              }
+            },
+            {
+              "name": "movement",
+              "config": {
+                "speed": 100
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "3cea36ae-6500-4475-89aa-cb47ef6eb5a6",
+          "name": "City",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 16,
+                "offsetY": -16,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 3,
+                "scaleY": 3
+              }
+            },
+            {
+              "name": "renderable",
+              "config": {
+                "type": "static",
+                "src": "city.png",
+                "width": 6400,
+                "height": 64,
+                "rotation": 0,
+                "sortCenter": [
+                  0,
+                  0
+                ],
+                "flipX": false,
+                "flipY": false,
+                "sortingLayer": "background",
+                "fit": "repeat",
+                "material": {
+                  "type": "basic",
+                  "options": {
+                    "blending": "normal",
+                    "color": "#fff",
+                    "opacity": 1
+                  }
+                }
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "6c21114c-d4d9-4e6e-928d-8a620ac233c5",
+          "templateId": "b9a19a3c-6adf-4172-a428-9f820c1fd403",
+          "fromTemplate": true,
+          "name": "PlatformWide",
+          "type": "",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": -32,
+                "offsetY": 56,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "162bdbe5-81ec-483c-ba1b-2e264c99a6f8",
+          "templateId": "b9a19a3c-6adf-4172-a428-9f820c1fd403",
+          "fromTemplate": true,
+          "name": "PlatformWide 1",
+          "type": "",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 32,
+                "offsetY": 56,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "25351bb2-61fb-4c5b-90ca-0448c8be21e4",
+          "templateId": "b9a19a3c-6adf-4172-a428-9f820c1fd403",
+          "fromTemplate": true,
+          "name": "PlatformWide 2",
+          "type": "",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 96,
+                "offsetY": 56,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "6a5cb7db-eee8-4e8b-bd5e-e7f09ea0b78f",
+          "templateId": "2a1fdaf8-62da-4adc-b29f-55d9a9d321b4",
+          "fromTemplate": true,
+          "name": "PlatformShort",
+          "type": "",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 216,
+                "offsetY": 56,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "9b331dd3-fde2-4f15-b6c6-27b7ae6c9096",
+          "templateId": "2a1fdaf8-62da-4adc-b29f-55d9a9d321b4",
+          "fromTemplate": true,
+          "name": "PlatformShort 1",
+          "type": "",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 280,
+                "offsetY": 8,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "14e5353e-1348-4cb7-ac56-40497c65bea8",
+          "templateId": "b9a19a3c-6adf-4172-a428-9f820c1fd403",
+          "fromTemplate": true,
+          "name": "PlatformWide 3",
+          "type": "",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 384,
+                "offsetY": 56,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "d390405b-6331-4870-8072-56b1b7b3ea46",
+          "templateId": "b9a19a3c-6adf-4172-a428-9f820c1fd403",
+          "fromTemplate": true,
+          "name": "PlatformWide 4",
+          "type": "",
+          "components": [
+            {
+              "name": "transform",
+              "config": {
+                "offsetX": 448,
+                "offsetY": 56,
+                "offsetZ": 0,
+                "rotation": 0,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "templates": [
+    {
+      "id": "b9a19a3c-6adf-4172-a428-9f820c1fd403",
+      "name": "PlatformWide",
+      "type": "",
+      "components": [
+        {
+          "name": "transform",
+          "config": {
+            "offsetX": 0,
+            "offsetY": 0,
+            "offsetZ": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
+          }
+        },
+        {
+          "name": "renderable",
+          "config": {
+            "type": "static",
+            "src": "platform.png",
+            "width": 64,
+            "height": 16,
+            "rotation": 0,
+            "sortCenter": [
+              0,
+              0
+            ],
+            "flipX": false,
+            "flipY": false,
+            "sortingLayer": "decorations",
+            "fit": "repeat",
+            "material": {
+              "type": "basic",
+              "options": {
+                "blending": "normal",
+                "color": "#ffffff",
+                "opacity": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "rigidBody",
+          "config": {
+            "type": "static",
+            "mass": 1,
+            "useGravity": false,
+            "isPermeable": false,
+            "ghost": false,
+            "drag": 0
+          }
+        },
+        {
+          "name": "colliderContainer",
+          "config": {
+            "type": "boxCollider",
+            "collider": {
+              "sizeX": 64,
+              "sizeY": 16,
+              "centerX": 0,
+              "centerY": 0
+            }
+          }
+        }
+      ],
+      "children": []
+    },
+    {
+      "id": "2a1fdaf8-62da-4adc-b29f-55d9a9d321b4",
+      "name": "PlatformShort",
+      "type": "",
+      "components": [
+        {
+          "name": "transform",
+          "config": {
+            "offsetX": 0,
+            "offsetY": 0,
+            "offsetZ": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1
+          }
+        },
+        {
+          "name": "renderable",
+          "config": {
+            "type": "static",
+            "src": "platform.png",
+            "width": 16,
+            "height": 16,
+            "rotation": 0,
+            "sortCenter": [
+              0,
+              0
+            ],
+            "flipX": false,
+            "flipY": false,
+            "sortingLayer": "decorations",
+            "fit": "repeat",
+            "material": {
+              "type": "basic",
+              "options": {
+                "blending": "normal",
+                "color": "#ffffff",
+                "opacity": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "rigidBody",
+          "config": {
+            "type": "static",
+            "mass": 1,
+            "useGravity": false,
+            "isPermeable": false,
+            "ghost": false,
+            "drag": 0
+          }
+        },
+        {
+          "name": "colliderContainer",
+          "config": {
+            "type": "boxCollider",
+            "collider": {
+              "sizeX": 16,
+              "sizeY": 16,
+              "centerX": 0,
+              "centerY": 0
+            }
+          }
+        }
+      ],
+      "children": []
+    }
+  ],
   "loaders": [],
   "globalOptions": [
     {
       "id": "55de48c1-8d95-4e5a-95bc-2f9e7dc84dc4",
       "name": "sortingLayers",
       "type": "array",
-      "value": []
+      "value": [
+        "background",
+        "decorations",
+        "units"
+      ]
     }
   ],
-  "startSceneId": null,
+  "startSceneId": "4f3c4560-ac1d-47f1-8e26-6135e5fe1d6b",
   "startLoaderId": null
 }
