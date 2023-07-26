@@ -25,5 +25,6 @@ module.exports = {
     'import/prefer-default-export': 0,
     'import/no-extraneous-dependencies': 0,
     'no-param-reassign': 'warn',
+    'linebreak-style': 0,
   },
 };
