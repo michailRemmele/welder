@@ -6,6 +6,7 @@ export class Movement extends Component {
 
     this.speed = config.speed;
     this.direction = 0;
+    this.viewDirection = 1;
     this.isJumping = false;
   }
 

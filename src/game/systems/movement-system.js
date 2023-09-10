@@ -59,6 +59,8 @@ export class MovementSystem {
       }
 
       transform.offsetX += movement.direction * movement.speed * (deltaTime / 1000);
+
+      movement.viewDirection = movement.direction;
     });
   }
 }
