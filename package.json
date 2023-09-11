@@ -5,13 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "npx cross-env NODE_ENV=development webpack-dev-server",
-    "start:editor": "npm run build:editor && npx remiz-editor",
-    "build": "npx cross-env NODE_ENV=production webpack",
-    "build:editor": "npx cross-env NODE_ENV=production webpack --config webpack.editor.config.js"
+    "start:editor": "npx remiz-editor",
+    "build": "npx cross-env NODE_ENV=production webpack"
   },
   "dependencies": {
-    "remiz": "0.10.4",
-    "remiz-editor": "0.0.1"
+    "remiz": "0.10.5",
+    "remiz-editor": "0.0.7"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",
