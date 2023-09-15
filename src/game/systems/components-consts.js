@@ -1,6 +1,6 @@
 // Components
 export const TRANSFORM_COMPONENT_NAME = 'transform';
-export const RIGID_COMPONENT_NAME = 'rigidBody';
+export const RIGID_BODY_COMPONENT_NAME = 'rigidBody';
 export const COLLIDER_COMPONENT_NAME = 'colliderContainer';
 export const CONTROL_COMPONENT_NAME = 'keyboardControl';
 

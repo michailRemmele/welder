@@ -38,7 +38,7 @@ export class MovementSystem {
       if (collisionMessages?.length
         && collisionMessages.at(-1).mtv1.y < 0
         && collisionMessages.at(-1).mtv1.x === 0
-        && !!collisionMessages.at(-1).gameObject2.getComponent(COMPONENTS.RIGID_COMPONENT_NAME)
+        && !!collisionMessages.at(-1).gameObject2.getComponent(COMPONENTS.RIGID_BODY_COMPONENT_NAME)
       ) {
         movement.isJumping = false;
       }
