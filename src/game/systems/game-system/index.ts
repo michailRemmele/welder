@@ -1,12 +1,27 @@
-import { Vector2 } from 'remiz';
+import {
+  Vector2,
+  Transform,
+  RigidBody,
+  ColliderContainer,
+  KeyboardControl,
+  System,
+} from 'remiz';
+import type {
+  SystemOptions,
+  UpdateOptions,
+  GameObject,
+  GameObjectObserver,
+  GameObjectSpawner,
+  GameObjectDestroyer,
+  MessageBus,
+} from 'remiz';
 
-const TRANSFORM_COMPONENT_NAME = 'transform';
-const AI_COMPONENT_NAME = 'ai';
-const ATTACK_COMPONENT_NAME = 'attack';
-const VIEW_DIRECTION_COMPONENT_NAME = 'viewDirection';
-const RIGID_BODY_COMPONENT_NAME = 'rigidBody';
-const COLLIDER_COMPONENT_NAME = 'colliderContainer';
-const CONTROL_COMPONENT_NAME = 'keyboardControl';
+import {
+  AI,
+  Attack,
+  ViewDirection,
+} from '../../components';
+import type { CollisionEnterMessage } from '../../../types/messages';
 
 const COLLISION_ENTER_MSG = 'COLLISION_ENTER';
 const LOAD_SCENE_MSG = 'LOAD_SCENE';
@@ -25,14 +40,25 @@ const ELEVATOR_ID = '62201ef0-b40c-4433-8dd0-d7ff3ff4d04f';
 const ATTACK_DISTANCE = 16;
 const ATTACK_COOLDOWN = 500;
 
-export class GameSystem {
-  constructor(options) {
+export class GameSystem extends System {
+  private gameObjectObserver: GameObjectObserver;
+  private attacksObserver: GameObjectObserver;
+  private corpseObserver: GameObjectObserver;
+  private gameObjectSpawner: GameObjectSpawner;
+  private gameObjectDestroyer: GameObjectDestroyer;
+  private messageBus: MessageBus;
+
+  private attackCooldown: number;
+
+  constructor(options: SystemOptions) {
+    super();
+
     this.gameObjectObserver = options.createGameObjectObserver({});
     this.attacksObserver = options.createGameObjectObserver({
-      components: [ATTACK_COMPONENT_NAME],
+      components: [Attack],
     });
     this.corpseObserver = options.createGameObjectObserver({
-      components: [TRANSFORM_COMPONENT_NAME, COLLIDER_COMPONENT_NAME, RIGID_BODY_COMPONENT_NAME],
+      components: [Transform, ColliderContainer, RigidBody],
     });
     this.gameObjectSpawner = options.gameObjectSpawner;
     this.gameObjectDestroyer = options.gameObjectDestroyer;
@@ -41,19 +67,19 @@ export class GameSystem {
     this.attackCooldown = 0;
   }
 
-  updateCamera() {
-    const player = this.gameObjectObserver.getById(PLAYER_ID);
-    const playerTransform = player.getComponent(TRANSFORM_COMPONENT_NAME);
+  updateCamera(): void {
+    const player = this.gameObjectObserver.getById(PLAYER_ID) as GameObject;
+    const playerTransform = player.getComponent(Transform);
 
-    const camera = this.gameObjectObserver.getById(CAMERA_ID);
-    const cameraTransform = camera.getComponent(TRANSFORM_COMPONENT_NAME);
+    const camera = this.gameObjectObserver.getById(CAMERA_ID) as GameObject;
+    const cameraTransform = camera.getComponent(Transform);
 
     cameraTransform.offsetX = playerTransform.offsetX;
   }
 
-  updateAttack(deltaTime) {
+  updateAttack(deltaTime: number): void {
     this.attacksObserver.forEach((gameObject) => {
-      const attackComponent = gameObject.getComponent(ATTACK_COMPONENT_NAME);
+      const attackComponent = gameObject.getComponent(Attack);
       attackComponent.lifetime -= deltaTime;
       if (attackComponent.lifetime < 0) {
         this.gameObjectDestroyer.destroy(gameObject);
@@ -71,12 +97,12 @@ export class GameSystem {
       return;
     }
 
-    const player = this.gameObjectObserver.getById(PLAYER_ID);
-    const playerTransform = player.getComponent(TRANSFORM_COMPONENT_NAME);
-    const playerViewDirection = player.getComponent(VIEW_DIRECTION_COMPONENT_NAME);
+    const player = this.gameObjectObserver.getById(PLAYER_ID) as GameObject;
+    const playerTransform = player.getComponent(Transform);
+    const playerViewDirection = player.getComponent(ViewDirection);
 
     const attack = this.gameObjectSpawner.spawn(ATTACK_TEMPLATE_ID);
-    const attackTransform = attack.getComponent(TRANSFORM_COMPONENT_NAME);
+    const attackTransform = attack.getComponent(Transform);
 
     attackTransform.offsetX = playerTransform.offsetX + ATTACK_DISTANCE * playerViewDirection.x;
     attackTransform.offsetY = playerTransform.offsetY;
@@ -84,18 +110,21 @@ export class GameSystem {
     this.attackCooldown = ATTACK_COOLDOWN;
   }
 
-  updateDamage() {
-    const collisionMessages = this.messageBus.getById(COLLISION_ENTER_MSG, PLAYER_ID);
+  updateDamage(): void {
+    const collisionMessages = this.messageBus.getById(
+      COLLISION_ENTER_MSG,
+      PLAYER_ID,
+    ) as Array<CollisionEnterMessage> | undefined;
     const shouldFly = collisionMessages?.some(
-      (message) => !!message.gameObject2.getComponent(AI_COMPONENT_NAME),
+      (message) => !!message.gameObject2.getComponent(AI),
     );
 
-    const player = this.gameObjectObserver.getById(PLAYER_ID);
-    const rigidBody = player.getComponent(RIGID_BODY_COMPONENT_NAME);
+    const player = this.gameObjectObserver.getById(PLAYER_ID) as GameObject;
+    const rigidBody = player.getComponent(RigidBody);
 
     if (shouldFly && !rigidBody.ghost) {
       rigidBody.ghost = true;
-      player.removeComponent(CONTROL_COMPONENT_NAME);
+      player.removeComponent(KeyboardControl);
       this.messageBus.send({
         type: ADD_IMPULSE_MSG,
         value: new Vector2(0, -150),
@@ -105,8 +134,11 @@ export class GameSystem {
     }
   }
 
-  updateGameOver() {
-    const collisionMessages = this.messageBus.getById(COLLISION_ENTER_MSG, PLAYER_ID);
+  updateGameOver(): void {
+    const collisionMessages = this.messageBus.getById(
+      COLLISION_ENTER_MSG,
+      PLAYER_ID,
+    ) as Array<CollisionEnterMessage> | undefined;
     const isGameOver = collisionMessages?.some(
       (message) => message.gameObject2.id === DEAD_ZONE_ID,
     );
@@ -121,25 +153,31 @@ export class GameSystem {
     }
   }
 
-  updateFinish() {
-    const collisionMessages = this.messageBus.getById(COLLISION_ENTER_MSG, PLAYER_ID);
+  updateFinish(): void {
+    const collisionMessages = this.messageBus.getById(
+      COLLISION_ENTER_MSG,
+      PLAYER_ID,
+    ) as Array<CollisionEnterMessage> | undefined;
     const isGameOver = collisionMessages?.some(
       (message) => message.gameObject2.id === ELEVATOR_ID,
     );
 
     if (isGameOver) {
-      const player = this.gameObjectObserver.getById(PLAYER_ID);
-      player.removeComponent(CONTROL_COMPONENT_NAME);
+      const player = this.gameObjectObserver.getById(PLAYER_ID) as GameObject;
+      player.removeComponent(KeyboardControl);
 
-      const elevator = this.gameObjectObserver.getById(ELEVATOR_ID);
-      const rigidBody = elevator.getComponent(RIGID_BODY_COMPONENT_NAME);
+      const elevator = this.gameObjectObserver.getById(ELEVATOR_ID) as GameObject;
+      const rigidBody = elevator.getComponent(RigidBody);
       rigidBody.useGravity = true;
     }
   }
 
-  updateDeath() {
+  updateDeath(): void {
     this.corpseObserver.forEach((gameObject) => {
-      const collisionMessages = this.messageBus.getById(COLLISION_ENTER_MSG, gameObject.id);
+      const collisionMessages = this.messageBus.getById(
+        COLLISION_ENTER_MSG,
+        gameObject.id,
+      ) as Array<CollisionEnterMessage> | undefined;
       const shouldDie = collisionMessages?.some(
         (message) => message.gameObject2.id === DEAD_ZONE_ID,
       );
@@ -150,7 +188,7 @@ export class GameSystem {
     });
   }
 
-  update({ deltaTime }) {
+  update({ deltaTime }: UpdateOptions): void {
     this.updateCamera();
     this.updateAttack(deltaTime);
     this.updateDamage();
@@ -159,3 +197,5 @@ export class GameSystem {
     this.updateDeath();
   }
 }
+
+GameSystem.systemName = 'GameSystem';

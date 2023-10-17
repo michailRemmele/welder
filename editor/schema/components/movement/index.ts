@@ -1,4 +1,6 @@
-export const movement = {
+import type { WidgetSchema } from 'remiz-editor';
+
+export const movement: WidgetSchema = {
   title: 'components.movement.title',
   fields: [
     {

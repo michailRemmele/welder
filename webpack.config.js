@@ -11,7 +11,7 @@ module.exports = {
   mode: 'none',
 
   entry: {
-    app: path.resolve(__dirname, 'src/index.js'),
+    app: path.resolve(__dirname, 'src/index.ts'),
   },
 
   output: {
@@ -30,7 +30,7 @@ module.exports = {
   devtool: isDev ? 'eval' : false,
 
   resolve: {
-    extensions: ['.js'],
+    extensions: ['.js', '.ts'],
   },
 
   optimization: {
@@ -62,4 +62,18 @@ module.exports = {
       ],
     }),
   ].filter(Boolean),
+
+  module: {
+    rules: [
+      {
+        test: /\.(j|t)s$/,
+        exclude: /(node_modules)/,
+        use: [
+          {
+            loader: 'babel-loader',
+          },
+        ],
+      },
+    ],
+  },
 };

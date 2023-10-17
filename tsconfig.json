@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+      "baseUrl": ".",
+      "outDir": "./docs/",
+
+      "module": "esnext",
+      "moduleResolution": "node",
+
+      "strict": true,
+
+      "target": "es6",
+      "esModuleInterop": true,
+
+      "resolveJsonModule": true,
+
+      "typeRoots": [
+        "src/types",
+        "node_modules/@types"
+      ]
+  },
+  "include": [
+      "src",
+      "editor"
+  ]
+}
