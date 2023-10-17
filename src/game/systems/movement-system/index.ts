@@ -1,4 +1,21 @@
-import { Vector2 } from 'remiz';
+import {
+  Vector2,
+  Transform,
+  RigidBody,
+  System,
+} from 'remiz';
+import type {
+  SystemOptions,
+  UpdateOptions,
+  GameObjectObserver,
+  MessageBus,
+} from 'remiz';
+
+import {
+  Movement,
+  ViewDirection,
+} from '../../components';
+import type { CollisionEnterMessage } from '../../../types/messages';
 
 const MOVE_LEFT_MSG = 'MOVE_LEFT';
 const MOVE_RIGHT_MSG = 'MOVE_RIGHT';
@@ -7,33 +24,33 @@ const COLLISION_ENTER_MSG = 'COLLISION_ENTER';
 
 const ADD_IMPULSE_MSG = 'ADD_IMPULSE';
 
-const TRANSFORM_COMPONENT_NAME = 'transform';
-const MOVEMENT_COMPONENT_NAME = 'movement';
-const RIGID_BODY_COMPONENT_NAME = 'rigidBody';
-const VIEW_DIRECTION_COMPONENT_NAME = 'viewDirection';
-
 const JUMP_IMPULSE = -215;
 
-export class MovementSystem {
-  constructor(options) {
+export class MovementSystem extends System {
+  private gameObjectObserver: GameObjectObserver;
+  private messageBus: MessageBus;
+
+  constructor(options: SystemOptions) {
+    super();
+
     this.gameObjectObserver = options.createGameObjectObserver({
       components: [
-        TRANSFORM_COMPONENT_NAME,
-        MOVEMENT_COMPONENT_NAME,
-        VIEW_DIRECTION_COMPONENT_NAME,
+        Transform,
+        Movement,
+        ViewDirection,
       ],
     });
     this.messageBus = options.messageBus;
   }
 
-  update(options) {
+  update(options: UpdateOptions): void {
     const deltaTimeInSeconds = options.deltaTime / 1000;
 
     this.gameObjectObserver.forEach((gameObject) => {
       const gameObjectId = gameObject.getId();
 
-      const movement = gameObject.getComponent(MOVEMENT_COMPONENT_NAME);
-      const viewDirection = gameObject.getComponent(VIEW_DIRECTION_COMPONENT_NAME);
+      const movement = gameObject.getComponent(Movement);
+      const viewDirection = gameObject.getComponent(ViewDirection);
       movement.direction = 0;
 
       const leftMessages = this.messageBus.getById(MOVE_LEFT_MSG, gameObjectId);
@@ -46,11 +63,14 @@ export class MovementSystem {
         movement.direction += 1;
       }
 
-      const collisionMessages = this.messageBus.getById(COLLISION_ENTER_MSG, gameObjectId);
+      const collisionMessages = this.messageBus.getById(
+        COLLISION_ENTER_MSG,
+        gameObjectId,
+      ) as Array<CollisionEnterMessage> | undefined;
       if (collisionMessages?.length
-        && collisionMessages.at(-1).mtv1.x === 0
-        && collisionMessages.at(-1).mtv1.y < 0
-        && !!collisionMessages.at(-1).gameObject2.getComponent(RIGID_BODY_COMPONENT_NAME)
+        && (collisionMessages.at(-1) as CollisionEnterMessage).mtv1.x === 0
+        && (collisionMessages.at(-1) as CollisionEnterMessage).mtv1.y < 0
+        && !!collisionMessages.at(-1)?.gameObject2.getComponent(RigidBody)
       ) {
         movement.isJumping = false;
       }
@@ -72,10 +92,12 @@ export class MovementSystem {
 
       const movementDelta = movement.direction * movement.speed * deltaTimeInSeconds;
 
-      const transform = gameObject.getComponent(TRANSFORM_COMPONENT_NAME);
+      const transform = gameObject.getComponent(Transform);
       transform.offsetX += movementDelta;
 
       viewDirection.x = movement.direction;
     });
   }
 }
+
+MovementSystem.systemName = 'MovementSystem';
