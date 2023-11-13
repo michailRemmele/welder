@@ -9,8 +9,8 @@
     "build": "npx cross-env NODE_ENV=production webpack"
   },
   "dependencies": {
-    "remiz": "0.10.6",
-    "remiz-editor": "0.0.9"
+    "remiz": "0.11.0",
+    "remiz-editor": "0.0.10"
   },
   "devDependencies": {
     "@babel/cli": "7.23.0",

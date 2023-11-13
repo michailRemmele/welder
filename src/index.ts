@@ -6,7 +6,6 @@ import {
   KeyboardInputSystem,
   KeyboardControlSystem,
   MouseInputSystem,
-  MouseInputCoordinatesProjector,
   PhysicsSystem,
   Renderer,
 
@@ -42,7 +41,6 @@ const engine = new Engine({
     KeyboardInputSystem,
     KeyboardControlSystem,
     MouseInputSystem,
-    MouseInputCoordinatesProjector,
     PhysicsSystem,
     Renderer,
     AISystem,
