@@ -62,7 +62,6 @@ const engine = new Engine({
     Movement,
     ViewDirection,
   ],
-  helpers: {},
 });
 
 void engine.play();
