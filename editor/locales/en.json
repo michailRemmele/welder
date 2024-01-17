@@ -6,8 +6,12 @@
   "components.aiBlocker.title": "AI Blocker",
   "components.attack.title": "Attack",
   "components.viewDirection.title": "View Direction",
+  "components.deathZone.title": "Death Zone",
+  "components.finishZone.title": "Finish Zone",
 
   "systems.movementSystem.title": "Movement System",
   "systems.gameSystem.title": "Game System",
-  "systems.aiSystem.title": "AI System"
+  "systems.aiSystem.title": "AI System",
+
+  "resources.scriptSystem.camera.offsetY.title": "Offset Y"
 }

@@ -1,14 +1,19 @@
 import {
+  GameObject,
   Vector2,
   Transform,
   RigidBody,
   System,
+  AddImpulse,
+  CollisionEnter,
+  AddGameObject,
+  RemoveGameObject,
 } from 'remiz';
 import type {
   SystemOptions,
-  GameObject,
   GameObjectObserver,
-  MessageBus,
+  UpdateGameObjectEvent,
+  CollisionEnterEvent,
 } from 'remiz';
 
 import {
@@ -16,18 +21,12 @@ import {
   AIBlocker,
   Attack,
 } from '../../components';
-import type { CollisionEnterMessage } from '../../../types/messages';
-
-const COLLISION_ENTER_MSG = 'COLLISION_ENTER';
-const MOVE_LEFT_MSG = 'MOVE_LEFT';
-const MOVE_RIGHT_MSG = 'MOVE_RIGHT';
-const ADD_IMPULSE_MSG = 'ADD_IMPULSE';
+import * as EventType from '../../events';
 
 export const FLY_IMPULSE = 150;
 
 export class AISystem extends System {
   private gameObjectObserver: GameObjectObserver;
-  private messageBus: MessageBus;
 
   constructor(options: SystemOptions) {
     super();
@@ -35,55 +34,59 @@ export class AISystem extends System {
     this.gameObjectObserver = options.createGameObjectObserver({
       components: [Transform, AI],
     });
-    this.messageBus = options.messageBus;
   }
 
-  updateMovement(gameObject: GameObject): void {
-    const ai = gameObject.getComponent(AI);
+  mount(): void {
+    this.gameObjectObserver.forEach(this.handleAddGameObject);
+    this.gameObjectObserver.addEventListener(AddGameObject, this.handleAddGameObject);
+    this.gameObjectObserver.addEventListener(RemoveGameObject, this.handleRemoveGameObject);
+  }
 
-    const collisionMessages = this.messageBus.getById(
-      COLLISION_ENTER_MSG,
-      gameObject.id,
-    ) as Array<CollisionEnterMessage> | undefined;
-    const shouldTurn = collisionMessages?.some(
-      (message) => !!message.gameObject2.getComponent(AIBlocker),
-    );
+  unmount(): void {
+    this.gameObjectObserver.forEach(this.handleRemoveGameObject);
+    this.gameObjectObserver.removeEventListener(AddGameObject, this.handleAddGameObject);
+    this.gameObjectObserver.removeEventListener(RemoveGameObject, this.handleRemoveGameObject);
+  }
+
+  private handleAddGameObject = (value: UpdateGameObjectEvent | GameObject): void => {
+    const gameObject = value instanceof GameObject ? value : value.gameObject;
+    gameObject.addEventListener(CollisionEnter, this.handleCollisionEnter);
+  };
+
+  private handleRemoveGameObject = (value: UpdateGameObjectEvent | GameObject): void => {
+    const gameObject = value instanceof GameObject ? value : value.gameObject;
+    gameObject.removeEventListener(CollisionEnter, this.handleCollisionEnter);
+  };
+
+  private handleCollisionEnter = (event: CollisionEnterEvent): void => {
+    const { gameObject, target, mtv } = event;
+
+    const ai = target.getComponent(AI);
+
+    const shouldTurn = !!gameObject.getComponent(AIBlocker);
     if (shouldTurn) {
       ai.direction *= -1;
     }
 
-    this.messageBus.send({
-      type: ai.direction === 1 ? MOVE_RIGHT_MSG : MOVE_LEFT_MSG,
-      id: gameObject.id,
-    });
-  }
-
-  updateAttack(gameObject: GameObject): void {
-    const collisionMessages = this.messageBus.getById(
-      COLLISION_ENTER_MSG,
-      gameObject.id,
-    ) as Array<CollisionEnterMessage> | undefined;
-    const collision = collisionMessages?.find(
-      (message) => !!message.gameObject2.getComponent(Attack),
-    );
-
-    if (collision) {
-      const rigidBody = gameObject.getComponent(RigidBody);
+    const hasAttacked = !!gameObject.getComponent(Attack);
+    if (hasAttacked) {
+      const rigidBody = target.getComponent(RigidBody);
       rigidBody.ghost = true;
-      gameObject.removeComponent(AI);
-      this.messageBus.send({
-        type: ADD_IMPULSE_MSG,
-        value: new Vector2(FLY_IMPULSE * Math.sign(collision.mtv1.x), -FLY_IMPULSE),
-        gameObject,
-        id: gameObject.id,
+      target.removeComponent(AI);
+      target.emit(AddImpulse, {
+        value: new Vector2(FLY_IMPULSE * Math.sign(mtv.x), -FLY_IMPULSE),
       });
     }
+  };
+
+  updateMovement(gameObject: GameObject): void {
+    const ai = gameObject.getComponent(AI);
+    gameObject.emit(ai.direction === 1 ? EventType.MoveRight : EventType.MoveLeft);
   }
 
   update(): void {
     this.gameObjectObserver.forEach((gameObject) => {
       this.updateMovement(gameObject);
-      this.updateAttack(gameObject);
     });
   }
 }

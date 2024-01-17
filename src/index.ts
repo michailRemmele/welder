@@ -8,6 +8,7 @@ import {
   MouseInputSystem,
   PhysicsSystem,
   SpriteRenderer,
+  ScriptSystem,
 
   Camera,
   KeyboardControl,
@@ -17,13 +18,13 @@ import {
   Sprite,
   Transform,
   MouseControl,
+  ScriptBundle,
 } from 'remiz';
 
 import config from '../data/data.json';
 
 import {
   AISystem,
-  GameSystem,
   MovementSystem,
 
   AI,
@@ -31,6 +32,12 @@ import {
   Attack,
   Movement,
   ViewDirection,
+  DeathZone,
+  FinishZone,
+
+  CameraScript,
+  DeathZoneScript,
+  PlayerScript,
 } from './game';
 
 const engine = new Engine({
@@ -43,8 +50,8 @@ const engine = new Engine({
     MouseInputSystem,
     PhysicsSystem,
     SpriteRenderer,
+    ScriptSystem,
     AISystem,
-    GameSystem,
     MovementSystem,
   ],
   components: [
@@ -56,12 +63,22 @@ const engine = new Engine({
     Sprite,
     Transform,
     MouseControl,
+    ScriptBundle,
     AI,
     AIBlocker,
     Attack,
     Movement,
     ViewDirection,
+    DeathZone,
+    FinishZone,
   ],
+  resources: {
+    [ScriptSystem.systemName]: [
+      CameraScript,
+      DeathZoneScript,
+      PlayerScript,
+    ],
+  },
 });
 
 void engine.play();
