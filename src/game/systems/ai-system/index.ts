@@ -1,5 +1,6 @@
 import {
   GameObject,
+  GameObjectObserver,
   Vector2,
   Transform,
   RigidBody,
@@ -11,8 +12,8 @@ import {
 } from 'remiz';
 import type {
   SystemOptions,
-  GameObjectObserver,
-  UpdateGameObjectEvent,
+  AddGameObjectEvent,
+  RemoveGameObjectEvent,
   CollisionEnterEvent,
 } from 'remiz';
 
@@ -31,7 +32,7 @@ export class AISystem extends System {
   constructor(options: SystemOptions) {
     super();
 
-    this.gameObjectObserver = options.createGameObjectObserver({
+    this.gameObjectObserver = new GameObjectObserver(options.scene, {
       components: [Transform, AI],
     });
   }
@@ -48,12 +49,12 @@ export class AISystem extends System {
     this.gameObjectObserver.removeEventListener(RemoveGameObject, this.handleRemoveGameObject);
   }
 
-  private handleAddGameObject = (value: UpdateGameObjectEvent | GameObject): void => {
+  private handleAddGameObject = (value: AddGameObjectEvent | GameObject): void => {
     const gameObject = value instanceof GameObject ? value : value.gameObject;
     gameObject.addEventListener(CollisionEnter, this.handleCollisionEnter);
   };
 
-  private handleRemoveGameObject = (value: UpdateGameObjectEvent | GameObject): void => {
+  private handleRemoveGameObject = (value: RemoveGameObjectEvent | GameObject): void => {
     const gameObject = value instanceof GameObject ? value : value.gameObject;
     gameObject.removeEventListener(CollisionEnter, this.handleCollisionEnter);
   };

@@ -2,7 +2,6 @@ import type {
   Scene,
   GameObject,
   GameObjectSpawner,
-  GameObjectDestroyer,
   UpdateOptions,
   GameObjectEvent,
   CollisionEnterEvent,
@@ -38,7 +37,6 @@ export class PlayerScript extends Script {
   private scene: Scene;
   private gameObject: GameObject;
   private gameObjectSpawner: GameObjectSpawner;
-  private gameObjectDestroyer: GameObjectDestroyer;
 
   private attackCooldown: number;
   private activeAttacks: Array<GameObject>;
@@ -49,7 +47,6 @@ export class PlayerScript extends Script {
     this.scene = options.scene;
     this.gameObject = options.gameObject;
     this.gameObjectSpawner = options.gameObjectSpawner;
-    this.gameObjectDestroyer = options.gameObjectDestroyer;
 
     this.attackCooldown = 0;
     this.activeAttacks = [];
@@ -81,6 +78,8 @@ export class PlayerScript extends Script {
 
     this.attackCooldown = ATTACK_COOLDOWN;
     this.activeAttacks.push(attack);
+
+    this.gameObject.emit(EventType.AttackStart);
   };
 
   private handleCollisionEnter = (event: CollisionEnterEvent): void => {
@@ -122,7 +121,7 @@ export class PlayerScript extends Script {
       const attackComponent = gameObject.getComponent(Attack);
       attackComponent.lifetime -= deltaTime;
       if (attackComponent.lifetime < 0) {
-        this.gameObjectDestroyer.destroy(gameObject);
+        gameObject.destroy();
         return false;
       }
 

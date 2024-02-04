@@ -4,6 +4,7 @@ export const MoveLeft = 'MoveLeft';
 export const MoveRight = 'MoveRight';
 export const MoveJump = 'MoveJump';
 export const Attack = 'Attack';
+export const AttackStart = 'AttackStart';
 
 declare module 'remiz' {
   export interface GameObjectEventMap {
@@ -11,5 +12,6 @@ declare module 'remiz' {
     [MoveRight]: GameObjectEvent
     [MoveJump]: GameObjectEvent
     [Attack]: GameObjectEvent
+    [AttackStart]: GameObjectEvent
   }
 }

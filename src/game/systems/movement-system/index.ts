@@ -1,5 +1,6 @@
 import {
   GameObject,
+  GameObjectObserver,
   Vector2,
   Transform,
   RigidBody,
@@ -12,8 +13,8 @@ import {
 import type {
   SystemOptions,
   UpdateOptions,
-  GameObjectObserver,
-  UpdateGameObjectEvent,
+  AddGameObjectEvent,
+  RemoveGameObjectEvent,
   GameObjectEvent,
   CollisionEnterEvent,
 } from 'remiz';
@@ -32,7 +33,7 @@ export class MovementSystem extends System {
   constructor(options: SystemOptions) {
     super();
 
-    this.gameObjectObserver = options.createGameObjectObserver({
+    this.gameObjectObserver = new GameObjectObserver(options.scene, {
       components: [
         Transform,
         Movement,
@@ -53,7 +54,7 @@ export class MovementSystem extends System {
     this.gameObjectObserver.removeEventListener(RemoveGameObject, this.handleRemoveGameObject);
   }
 
-  private handleAddGameObject = (value: UpdateGameObjectEvent | GameObject): void => {
+  private handleAddGameObject = (value: AddGameObjectEvent | GameObject): void => {
     const gameObject = value instanceof GameObject ? value : value.gameObject;
     gameObject.addEventListener(CollisionEnter, this.handleCollisionEnter);
     gameObject.addEventListener(EventType.MoveLeft, this.handleMoveLeft);
@@ -61,7 +62,7 @@ export class MovementSystem extends System {
     gameObject.addEventListener(EventType.MoveJump, this.handleJump);
   };
 
-  private handleRemoveGameObject = (value: UpdateGameObjectEvent | GameObject): void => {
+  private handleRemoveGameObject = (value: RemoveGameObjectEvent | GameObject): void => {
     const gameObject = value instanceof GameObject ? value : value.gameObject;
     gameObject.removeEventListener(CollisionEnter, this.handleCollisionEnter);
     gameObject.removeEventListener(EventType.MoveLeft, this.handleMoveLeft);

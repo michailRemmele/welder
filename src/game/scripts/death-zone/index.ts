@@ -1,6 +1,5 @@
 import type {
   GameObject,
-  GameObjectDestroyer,
   ScriptOptions,
   CollisionEnterEvent,
 } from 'remiz';
@@ -13,13 +12,11 @@ import { Movement } from '../../components';
 
 export class DeathZoneScript extends Script {
   private gameObject: GameObject;
-  private gameObjectDestroyer: GameObjectDestroyer;
 
   constructor(options: ScriptOptions) {
     super();
 
     this.gameObject = options.gameObject;
-    this.gameObjectDestroyer = options.gameObjectDestroyer;
 
     this.gameObject.addEventListener(CollisionEnter, this.handleDeath);
   }
@@ -32,7 +29,7 @@ export class DeathZoneScript extends Script {
     const { gameObject } = event;
 
     if (gameObject.getComponent(Movement)) {
-      this.gameObjectDestroyer.destroy(gameObject);
+      gameObject.destroy();
     }
   };
 }
