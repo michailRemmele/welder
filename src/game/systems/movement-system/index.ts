@@ -1,21 +1,17 @@
 import {
-  GameObject,
-  GameObjectObserver,
+  Scene,
+  ActorCollection,
   Vector2,
   Transform,
   RigidBody,
   System,
   CollisionEnter,
   AddImpulse,
-  AddGameObject,
-  RemoveGameObject,
 } from 'remiz';
 import type {
   SystemOptions,
   UpdateOptions,
-  AddGameObjectEvent,
-  RemoveGameObjectEvent,
-  GameObjectEvent,
+  ActorEvent,
   CollisionEnterEvent,
 } from 'remiz';
 
@@ -28,12 +24,14 @@ import * as EventType from '../../events';
 const JUMP_IMPULSE = -215;
 
 export class MovementSystem extends System {
-  private gameObjectObserver: GameObjectObserver;
+  private scene: Scene;
+  private actorCollection: ActorCollection;
 
   constructor(options: SystemOptions) {
     super();
 
-    this.gameObjectObserver = new GameObjectObserver(options.scene, {
+    this.scene = options.scene;
+    this.actorCollection = new ActorCollection(options.scene, {
       components: [
         Transform,
         Movement,
@@ -43,46 +41,32 @@ export class MovementSystem extends System {
   }
 
   mount(): void {
-    this.gameObjectObserver.forEach(this.handleAddGameObject);
-    this.gameObjectObserver.addEventListener(AddGameObject, this.handleAddGameObject);
-    this.gameObjectObserver.addEventListener(RemoveGameObject, this.handleRemoveGameObject);
+    this.scene.addEventListener(CollisionEnter, this.handleCollisionEnter);
+    this.scene.addEventListener(EventType.MoveLeft, this.handleMoveLeft);
+    this.scene.addEventListener(EventType.MoveRight, this.handleMoveRight);
+    this.scene.addEventListener(EventType.MoveJump, this.handleJump);
   }
 
   unmount(): void {
-    this.gameObjectObserver.forEach(this.handleRemoveGameObject);
-    this.gameObjectObserver.removeEventListener(AddGameObject, this.handleAddGameObject);
-    this.gameObjectObserver.removeEventListener(RemoveGameObject, this.handleRemoveGameObject);
+    this.scene.removeEventListener(CollisionEnter, this.handleCollisionEnter);
+    this.scene.removeEventListener(EventType.MoveLeft, this.handleMoveLeft);
+    this.scene.removeEventListener(EventType.MoveRight, this.handleMoveRight);
+    this.scene.removeEventListener(EventType.MoveJump, this.handleJump);
   }
 
-  private handleAddGameObject = (value: AddGameObjectEvent | GameObject): void => {
-    const gameObject = value instanceof GameObject ? value : value.gameObject;
-    gameObject.addEventListener(CollisionEnter, this.handleCollisionEnter);
-    gameObject.addEventListener(EventType.MoveLeft, this.handleMoveLeft);
-    gameObject.addEventListener(EventType.MoveRight, this.handleMoveRight);
-    gameObject.addEventListener(EventType.MoveJump, this.handleJump);
-  };
-
-  private handleRemoveGameObject = (value: RemoveGameObjectEvent | GameObject): void => {
-    const gameObject = value instanceof GameObject ? value : value.gameObject;
-    gameObject.removeEventListener(CollisionEnter, this.handleCollisionEnter);
-    gameObject.removeEventListener(EventType.MoveLeft, this.handleMoveLeft);
-    gameObject.removeEventListener(EventType.MoveRight, this.handleMoveRight);
-    gameObject.removeEventListener(EventType.MoveJump, this.handleJump);
-  };
-
-  private handleMoveLeft = (event: GameObjectEvent): void => {
+  private handleMoveLeft = (event: ActorEvent): void => {
     const movement = event.target.getComponent(Movement);
     movement.direction = -1;
     movement.isMoving = true;
   };
 
-  private handleMoveRight = (event: GameObjectEvent): void => {
+  private handleMoveRight = (event: ActorEvent): void => {
     const movement = event.target.getComponent(Movement);
     movement.direction = 1;
     movement.isMoving = true;
   };
 
-  private handleJump = (event: GameObjectEvent): void => {
+  private handleJump = (event: ActorEvent): void => {
     const movement = event.target.getComponent(Movement);
     if (movement.isJumping) {
       return;
@@ -95,10 +79,14 @@ export class MovementSystem extends System {
   };
 
   private handleCollisionEnter = (event: CollisionEnterEvent): void => {
-    const { mtv, gameObject, target } = event;
+    const { mtv, actor, target } = event;
 
-    if (mtv.x === 0 && mtv.y < 0 && !!gameObject.getComponent(RigidBody)) {
-      const movement = target.getComponent(Movement);
+    const movement = target.getComponent(Movement);
+    if (movement === undefined) {
+      return;
+    }
+
+    if (mtv.x === 0 && mtv.y < 0 && !!actor.getComponent(RigidBody)) {
       movement.isJumping = false;
     }
   };
@@ -106,9 +94,9 @@ export class MovementSystem extends System {
   update(options: UpdateOptions): void {
     const deltaTimeInSeconds = options.deltaTime / 1000;
 
-    this.gameObjectObserver.forEach((gameObject) => {
-      const movement = gameObject.getComponent(Movement);
-      const viewDirection = gameObject.getComponent(ViewDirection);
+    this.actorCollection.forEach((actor) => {
+      const movement = actor.getComponent(Movement);
+      const viewDirection = actor.getComponent(ViewDirection);
 
       if (!movement.isMoving) {
         movement.direction = 0;
@@ -117,7 +105,7 @@ export class MovementSystem extends System {
 
       const movementDelta = movement.direction * movement.speed * deltaTimeInSeconds;
 
-      const transform = gameObject.getComponent(Transform);
+      const transform = actor.getComponent(Transform);
       transform.offsetX += movementDelta;
 
       viewDirection.x = movement.direction;

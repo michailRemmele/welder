@@ -1,4 +1,4 @@
-import type { GameObjectEvent } from 'remiz';
+import type { ActorEvent } from 'remiz';
 
 export const MoveLeft = 'MoveLeft';
 export const MoveRight = 'MoveRight';
@@ -7,11 +7,11 @@ export const Attack = 'Attack';
 export const AttackStart = 'AttackStart';
 
 declare module 'remiz' {
-  export interface GameObjectEventMap {
-    [MoveLeft]: GameObjectEvent
-    [MoveRight]: GameObjectEvent
-    [MoveJump]: GameObjectEvent
-    [Attack]: GameObjectEvent
-    [AttackStart]: GameObjectEvent
+  export interface ActorEventMap {
+    [MoveLeft]: ActorEvent
+    [MoveRight]: ActorEvent
+    [MoveJump]: ActorEvent
+    [Attack]: ActorEvent
+    [AttackStart]: ActorEvent
   }
 }

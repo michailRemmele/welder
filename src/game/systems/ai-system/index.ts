@@ -1,19 +1,16 @@
 import {
-  GameObject,
-  GameObjectObserver,
+  Scene,
+  Actor,
+  ActorCollection,
   Vector2,
   Transform,
   RigidBody,
   System,
   AddImpulse,
   CollisionEnter,
-  AddGameObject,
-  RemoveGameObject,
 } from 'remiz';
 import type {
   SystemOptions,
-  AddGameObjectEvent,
-  RemoveGameObjectEvent,
   CollisionEnterEvent,
 } from 'remiz';
 
@@ -27,49 +24,40 @@ import * as EventType from '../../events';
 export const FLY_IMPULSE = 150;
 
 export class AISystem extends System {
-  private gameObjectObserver: GameObjectObserver;
+  private scene: Scene;
+  private actorCollection: ActorCollection;
 
   constructor(options: SystemOptions) {
     super();
 
-    this.gameObjectObserver = new GameObjectObserver(options.scene, {
+    this.scene = options.scene;
+    this.actorCollection = new ActorCollection(options.scene, {
       components: [Transform, AI],
     });
   }
 
   mount(): void {
-    this.gameObjectObserver.forEach(this.handleAddGameObject);
-    this.gameObjectObserver.addEventListener(AddGameObject, this.handleAddGameObject);
-    this.gameObjectObserver.addEventListener(RemoveGameObject, this.handleRemoveGameObject);
+    this.scene.addEventListener(CollisionEnter, this.handleCollisionEnter);
   }
 
   unmount(): void {
-    this.gameObjectObserver.forEach(this.handleRemoveGameObject);
-    this.gameObjectObserver.removeEventListener(AddGameObject, this.handleAddGameObject);
-    this.gameObjectObserver.removeEventListener(RemoveGameObject, this.handleRemoveGameObject);
+    this.scene.removeEventListener(CollisionEnter, this.handleCollisionEnter);
   }
 
-  private handleAddGameObject = (value: AddGameObjectEvent | GameObject): void => {
-    const gameObject = value instanceof GameObject ? value : value.gameObject;
-    gameObject.addEventListener(CollisionEnter, this.handleCollisionEnter);
-  };
-
-  private handleRemoveGameObject = (value: RemoveGameObjectEvent | GameObject): void => {
-    const gameObject = value instanceof GameObject ? value : value.gameObject;
-    gameObject.removeEventListener(CollisionEnter, this.handleCollisionEnter);
-  };
-
   private handleCollisionEnter = (event: CollisionEnterEvent): void => {
-    const { gameObject, target, mtv } = event;
+    const { actor, target, mtv } = event;
 
     const ai = target.getComponent(AI);
+    if (ai === undefined) {
+      return;
+    }
 
-    const shouldTurn = !!gameObject.getComponent(AIBlocker);
+    const shouldTurn = !!actor.getComponent(AIBlocker);
     if (shouldTurn) {
       ai.direction *= -1;
     }
 
-    const hasAttacked = !!gameObject.getComponent(Attack);
+    const hasAttacked = !!actor.getComponent(Attack);
     if (hasAttacked) {
       const rigidBody = target.getComponent(RigidBody);
       rigidBody.ghost = true;
@@ -80,14 +68,14 @@ export class AISystem extends System {
     }
   };
 
-  updateMovement(gameObject: GameObject): void {
-    const ai = gameObject.getComponent(AI);
-    gameObject.emit(ai.direction === 1 ? EventType.MoveRight : EventType.MoveLeft);
+  updateMovement(actor: Actor): void {
+    const ai = actor.getComponent(AI);
+    actor.emit(ai.direction === 1 ? EventType.MoveRight : EventType.MoveLeft);
   }
 
   update(): void {
-    this.gameObjectObserver.forEach((gameObject) => {
-      this.updateMovement(gameObject);
+    this.actorCollection.forEach((actor) => {
+      this.updateMovement(actor);
     });
   }
 }

@@ -1,5 +1,5 @@
 import type {
-  GameObject,
+  Actor,
   ScriptOptions,
   CollisionEnterEvent,
 } from 'remiz';
@@ -11,25 +11,25 @@ import {
 import { Movement } from '../../components';
 
 export class DeathZoneScript extends Script {
-  private gameObject: GameObject;
+  private actor: Actor;
 
   constructor(options: ScriptOptions) {
     super();
 
-    this.gameObject = options.gameObject;
+    this.actor = options.actor;
 
-    this.gameObject.addEventListener(CollisionEnter, this.handleDeath);
+    this.actor.addEventListener(CollisionEnter, this.handleDeath);
   }
 
   destroy(): void {
-    this.gameObject.removeEventListener(CollisionEnter, this.handleDeath);
+    this.actor.removeEventListener(CollisionEnter, this.handleDeath);
   }
 
   private handleDeath = (event: CollisionEnterEvent): void => {
-    const { gameObject } = event;
+    const { actor } = event;
 
-    if (gameObject.getComponent(Movement)) {
-      gameObject.destroy();
+    if (actor.getComponent(Movement)) {
+      actor.remove();
     }
   };
 }

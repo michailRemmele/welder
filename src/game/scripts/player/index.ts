@@ -1,9 +1,9 @@
 import type {
   Scene,
-  GameObject,
-  GameObjectSpawner,
+  Actor,
+  ActorSpawner,
   UpdateOptions,
-  GameObjectEvent,
+  ActorEvent,
   CollisionEnterEvent,
   ScriptOptions,
 } from 'remiz';
@@ -35,32 +35,32 @@ const ATTACK_COOLDOWN = 500;
 
 export class PlayerScript extends Script {
   private scene: Scene;
-  private gameObject: GameObject;
-  private gameObjectSpawner: GameObjectSpawner;
+  private actor: Actor;
+  private actorSpawner: ActorSpawner;
 
   private attackCooldown: number;
-  private activeAttacks: Array<GameObject>;
+  private activeAttacks: Array<Actor>;
 
   constructor(options: ScriptOptions) {
     super();
 
     this.scene = options.scene;
-    this.gameObject = options.gameObject;
-    this.gameObjectSpawner = options.gameObjectSpawner;
+    this.actor = options.actor;
+    this.actorSpawner = options.actorSpawner;
 
     this.attackCooldown = 0;
     this.activeAttacks = [];
 
-    this.gameObject.addEventListener(EventType.Attack, this.handleAttack);
-    this.gameObject.addEventListener(CollisionEnter, this.handleCollisionEnter);
+    this.actor.addEventListener(EventType.Attack, this.handleAttack);
+    this.actor.addEventListener(CollisionEnter, this.handleCollisionEnter);
   }
 
   destroy(): void {
-    this.gameObject.removeEventListener(EventType.Attack, this.handleAttack);
-    this.gameObject.removeEventListener(CollisionEnter, this.handleCollisionEnter);
+    this.actor.removeEventListener(EventType.Attack, this.handleAttack);
+    this.actor.removeEventListener(CollisionEnter, this.handleCollisionEnter);
   }
 
-  private handleAttack = (event: GameObjectEvent): void => {
+  private handleAttack = (event: ActorEvent): void => {
     if (this.attackCooldown > 0) {
       return;
     }
@@ -70,7 +70,7 @@ export class PlayerScript extends Script {
     const playerTransform = target.getComponent(Transform);
     const playerViewDirection = target.getComponent(ViewDirection);
 
-    const attack = this.gameObjectSpawner.spawn(ATTACK_TEMPLATE_ID);
+    const attack = this.actorSpawner.spawn(ATTACK_TEMPLATE_ID);
     const attackTransform = attack.getComponent(Transform);
 
     attackTransform.offsetX = playerTransform.offsetX + ATTACK_DISTANCE * playerViewDirection.x;
@@ -79,13 +79,15 @@ export class PlayerScript extends Script {
     this.attackCooldown = ATTACK_COOLDOWN;
     this.activeAttacks.push(attack);
 
-    this.gameObject.emit(EventType.AttackStart);
+    this.scene.appendChild(attack);
+
+    this.actor.emit(EventType.AttackStart);
   };
 
   private handleCollisionEnter = (event: CollisionEnterEvent): void => {
-    const { gameObject, target } = event;
+    const { actor, target } = event;
 
-    const shouldFly = !!gameObject.getComponent(AI);
+    const shouldFly = !!actor.getComponent(AI);
     const rigidBody = target.getComponent(RigidBody);
 
     if (shouldFly && !rigidBody.ghost) {
@@ -96,7 +98,7 @@ export class PlayerScript extends Script {
       });
     }
 
-    const isGameOver = !!gameObject.getComponent(DeathZone);
+    const isGameOver = !!actor.getComponent(DeathZone);
     if (isGameOver) {
       this.scene.emit(LoadScene, {
         sceneId: GAME_SCENE_ID,
@@ -107,21 +109,21 @@ export class PlayerScript extends Script {
       });
     }
 
-    const isFinish = !!gameObject.getComponent(FinishZone);
+    const isFinish = !!actor.getComponent(FinishZone);
     if (isFinish) {
       target.removeComponent(KeyboardControl);
 
-      const elevatorRigidBody = gameObject.getComponent(RigidBody);
+      const elevatorRigidBody = actor.getComponent(RigidBody);
       elevatorRigidBody.useGravity = true;
     }
   };
 
   private updateAttack(deltaTime: number): void {
-    this.activeAttacks = this.activeAttacks.filter((gameObject) => {
-      const attackComponent = gameObject.getComponent(Attack);
+    this.activeAttacks = this.activeAttacks.filter((actor) => {
+      const attackComponent = actor.getComponent(Attack);
       attackComponent.lifetime -= deltaTime;
       if (attackComponent.lifetime < 0) {
-        gameObject.destroy();
+        actor.remove();
         return false;
       }
 

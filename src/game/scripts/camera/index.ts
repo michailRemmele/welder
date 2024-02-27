@@ -1,5 +1,5 @@
 import type {
-  GameObject,
+  Actor,
   ScriptOptions,
 } from 'remiz';
 import { Script, Transform } from 'remiz';
@@ -9,18 +9,18 @@ interface CameraScriptOptions extends ScriptOptions {
 }
 
 export class CameraScript extends Script {
-  private gameObject: GameObject;
+  private actor: Actor;
   private offsetY: number;
 
   constructor(options: CameraScriptOptions) {
     super();
 
-    this.gameObject = options.gameObject;
+    this.actor = options.actor;
     this.offsetY = options.offsetY;
   }
 
   update(): void {
-    const cameraTransform = this.gameObject.getComponent(Transform);
+    const cameraTransform = this.actor.getComponent(Transform);
     cameraTransform.offsetY = this.offsetY;
   }
 }
