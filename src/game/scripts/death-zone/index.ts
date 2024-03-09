@@ -1,12 +1,7 @@
-import type {
-  Actor,
-  ScriptOptions,
-  CollisionEnterEvent,
-} from 'remiz';
-import {
-  Script,
-  CollisionEnter,
-} from 'remiz';
+import type { Actor, ScriptOptions } from 'remiz';
+import { Script } from 'remiz';
+import { CollisionEnter } from 'remiz/events';
+import type { CollisionEnterEvent } from 'remiz/events';
 
 import { Movement } from '../../components';
 

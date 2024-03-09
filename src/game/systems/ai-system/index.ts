@@ -6,13 +6,10 @@ import {
   Transform,
   RigidBody,
   System,
-  AddImpulse,
-  CollisionEnter,
 } from 'remiz';
-import type {
-  SystemOptions,
-  CollisionEnterEvent,
-} from 'remiz';
+import type { SystemOptions } from 'remiz';
+import { CollisionEnter, AddImpulse } from 'remiz/events';
+import type { CollisionEnterEvent } from 'remiz/events';
 
 import {
   AI,
@@ -62,7 +59,7 @@ export class AISystem extends System {
       const rigidBody = target.getComponent(RigidBody);
       rigidBody.ghost = true;
       target.removeComponent(AI);
-      target.emit(AddImpulse, {
+      target.dispatchEvent(AddImpulse, {
         value: new Vector2(FLY_IMPULSE * Math.sign(mtv.x), -FLY_IMPULSE),
       });
     }
@@ -70,7 +67,7 @@ export class AISystem extends System {
 
   updateMovement(actor: Actor): void {
     const ai = actor.getComponent(AI);
-    actor.emit(ai.direction === 1 ? EventType.MoveRight : EventType.MoveLeft);
+    actor.dispatchEvent(ai.direction === 1 ? EventType.MoveRight : EventType.MoveLeft);
   }
 
   update(): void {

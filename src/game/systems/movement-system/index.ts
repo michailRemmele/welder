@@ -5,15 +5,14 @@ import {
   Transform,
   RigidBody,
   System,
-  CollisionEnter,
-  AddImpulse,
 } from 'remiz';
 import type {
   SystemOptions,
   UpdateOptions,
   ActorEvent,
-  CollisionEnterEvent,
 } from 'remiz';
+import { CollisionEnter, AddImpulse } from 'remiz/events';
+import type { CollisionEnterEvent } from 'remiz/events';
 
 import {
   Movement,
@@ -72,7 +71,7 @@ export class MovementSystem extends System {
       return;
     }
 
-    event.target.emit(AddImpulse, {
+    event.target.dispatchEvent(AddImpulse, {
       value: new Vector2(0, JUMP_IMPULSE),
     });
     movement.isJumping = true;

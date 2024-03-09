@@ -4,7 +4,6 @@ import type {
   ActorSpawner,
   UpdateOptions,
   ActorEvent,
-  CollisionEnterEvent,
   ScriptOptions,
 } from 'remiz';
 import {
@@ -12,11 +11,10 @@ import {
   Transform,
   RigidBody,
   KeyboardControl,
-  AddImpulse,
-  CollisionEnter,
-  LoadScene,
   Script,
 } from 'remiz';
+import { AddImpulse, CollisionEnter, LoadScene } from 'remiz/events';
+import type { CollisionEnterEvent } from 'remiz/events';
 
 import {
   AI,
@@ -81,7 +79,7 @@ export class PlayerScript extends Script {
 
     this.scene.appendChild(attack);
 
-    this.actor.emit(EventType.AttackStart);
+    this.actor.dispatchEvent(EventType.AttackStart);
   };
 
   private handleCollisionEnter = (event: CollisionEnterEvent): void => {
@@ -93,14 +91,14 @@ export class PlayerScript extends Script {
     if (shouldFly && !rigidBody.ghost) {
       rigidBody.ghost = true;
       target.removeComponent(KeyboardControl);
-      target.emit(AddImpulse, {
+      target.dispatchEvent(AddImpulse, {
         value: new Vector2(0, -150),
       });
     }
 
     const isGameOver = !!actor.getComponent(DeathZone);
     if (isGameOver) {
-      this.scene.emit(LoadScene, {
+      this.scene.dispatchEvent(LoadScene, {
         sceneId: GAME_SCENE_ID,
         unloadCurrent: true,
         clean: true,
