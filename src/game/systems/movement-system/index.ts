@@ -1,4 +1,6 @@
 import {
+  Scene,
+  ActorCollection,
   Vector2,
   Transform,
   RigidBody,
@@ -7,95 +9,107 @@ import {
 import type {
   SystemOptions,
   UpdateOptions,
-  GameObjectObserver,
-  MessageBus,
+  ActorEvent,
 } from 'remiz';
+import { CollisionEnter, AddImpulse } from 'remiz/events';
+import type { CollisionEnterEvent } from 'remiz/events';
 
 import {
   Movement,
   ViewDirection,
 } from '../../components';
-import type { CollisionEnterMessage } from '../../../types/messages';
-
-const MOVE_LEFT_MSG = 'MOVE_LEFT';
-const MOVE_RIGHT_MSG = 'MOVE_RIGHT';
-const MOVE_JUMP_MSG = 'MOVE_JUMP';
-const COLLISION_ENTER_MSG = 'COLLISION_ENTER';
-
-const ADD_IMPULSE_MSG = 'ADD_IMPULSE';
+import * as EventType from '../../events';
 
 const JUMP_IMPULSE = -215;
 
 export class MovementSystem extends System {
-  private gameObjectObserver: GameObjectObserver;
-  private messageBus: MessageBus;
+  private scene: Scene;
+  private actorCollection: ActorCollection;
 
   constructor(options: SystemOptions) {
     super();
 
-    this.gameObjectObserver = options.createGameObjectObserver({
+    this.scene = options.scene;
+    this.actorCollection = new ActorCollection(options.scene, {
       components: [
         Transform,
         Movement,
         ViewDirection,
       ],
     });
-    this.messageBus = options.messageBus;
   }
+
+  mount(): void {
+    this.scene.addEventListener(CollisionEnter, this.handleCollisionEnter);
+    this.scene.addEventListener(EventType.MoveLeft, this.handleMoveLeft);
+    this.scene.addEventListener(EventType.MoveRight, this.handleMoveRight);
+    this.scene.addEventListener(EventType.MoveJump, this.handleJump);
+  }
+
+  unmount(): void {
+    this.scene.removeEventListener(CollisionEnter, this.handleCollisionEnter);
+    this.scene.removeEventListener(EventType.MoveLeft, this.handleMoveLeft);
+    this.scene.removeEventListener(EventType.MoveRight, this.handleMoveRight);
+    this.scene.removeEventListener(EventType.MoveJump, this.handleJump);
+  }
+
+  private handleMoveLeft = (event: ActorEvent): void => {
+    const movement = event.target.getComponent(Movement);
+    movement.direction = -1;
+    movement.isMoving = true;
+  };
+
+  private handleMoveRight = (event: ActorEvent): void => {
+    const movement = event.target.getComponent(Movement);
+    movement.direction = 1;
+    movement.isMoving = true;
+  };
+
+  private handleJump = (event: ActorEvent): void => {
+    const movement = event.target.getComponent(Movement);
+    if (movement.isJumping) {
+      return;
+    }
+
+    event.target.dispatchEvent(AddImpulse, {
+      value: new Vector2(0, JUMP_IMPULSE),
+    });
+    movement.isJumping = true;
+  };
+
+  private handleCollisionEnter = (event: CollisionEnterEvent): void => {
+    const { mtv, actor, target } = event;
+
+    const movement = target.getComponent(Movement);
+    if (movement === undefined) {
+      return;
+    }
+
+    if (mtv.x === 0 && mtv.y < 0 && !!actor.getComponent(RigidBody)) {
+      movement.isJumping = false;
+    }
+  };
 
   update(options: UpdateOptions): void {
     const deltaTimeInSeconds = options.deltaTime / 1000;
 
-    this.gameObjectObserver.forEach((gameObject) => {
-      const gameObjectId = gameObject.getId();
+    this.actorCollection.forEach((actor) => {
+      const movement = actor.getComponent(Movement);
+      const viewDirection = actor.getComponent(ViewDirection);
 
-      const movement = gameObject.getComponent(Movement);
-      const viewDirection = gameObject.getComponent(ViewDirection);
-      movement.direction = 0;
-
-      const leftMessages = this.messageBus.getById(MOVE_LEFT_MSG, gameObjectId);
-      if (leftMessages?.length) {
-        movement.direction -= 1;
-      }
-
-      const rightMessages = this.messageBus.getById(MOVE_RIGHT_MSG, gameObjectId);
-      if (rightMessages?.length) {
-        movement.direction += 1;
-      }
-
-      const collisionMessages = this.messageBus.getById(
-        COLLISION_ENTER_MSG,
-        gameObjectId,
-      ) as Array<CollisionEnterMessage> | undefined;
-      if (collisionMessages?.length
-        && (collisionMessages.at(-1) as CollisionEnterMessage).mtv1.x === 0
-        && (collisionMessages.at(-1) as CollisionEnterMessage).mtv1.y < 0
-        && !!collisionMessages.at(-1)?.gameObject2.getComponent(RigidBody)
-      ) {
-        movement.isJumping = false;
-      }
-
-      const jumpMessages = this.messageBus.getById(MOVE_JUMP_MSG, gameObjectId);
-      if (jumpMessages?.length && !movement.isJumping) {
-        this.messageBus.send({
-          type: ADD_IMPULSE_MSG,
-          value: new Vector2(0, JUMP_IMPULSE),
-          gameObject,
-          id: gameObjectId,
-        });
-        movement.isJumping = true;
-      }
-
-      if (movement.direction === 0) {
+      if (!movement.isMoving) {
+        movement.direction = 0;
         return;
       }
 
       const movementDelta = movement.direction * movement.speed * deltaTimeInSeconds;
 
-      const transform = gameObject.getComponent(Transform);
+      const transform = actor.getComponent(Transform);
       transform.offsetX += movementDelta;
 
       viewDirection.x = movement.direction;
+
+      movement.isMoving = false;
     });
   }
 }
