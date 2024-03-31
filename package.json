@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "remiz": "0.12.0",
-    "remiz-editor": "0.0.13"
+    "remiz-editor": "0.0.14"
   },
   "devDependencies": {
     "@babel/cli": "7.23.0",
